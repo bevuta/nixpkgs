@@ -1,13 +1,19 @@
-{ lib, stdenv, fetchurl, bundlerEnv, ruby_3_2, makeWrapper, nixosTests }:
-
-let
-  version = "5.1.5";
+{
+  lib,
+  stdenv,
+  fetchurl,
+  bundlerEnv,
+  ruby,
+  makeWrapper,
+  nixosTests,
+}: let
+  version = "6.0.2";
   rubyEnv = bundlerEnv {
     name = "redmine-env-${version}";
 
-    ruby = ruby_3_2;
+    inherit ruby;
     gemdir = ./.;
-    groups = [ "development" "ldap" "markdown" "common_mark" "minimagick" "test" ];
+    groups = ["development" "ldap" "markdown" "common_mark" "minimagick" "test"];
   };
 in
   stdenv.mkDerivation rec {
@@ -16,15 +22,15 @@ in
 
     src = fetchurl {
       url = "https://www.redmine.org/releases/redmine-${version}.tar.gz";
-      hash = "sha256-LJc5URcS/BOB2VhPoAX5EaMCLoNm0dalP+wPAU2sAWg=";
+      hash = "";
     };
 
-    nativeBuildInputs = [ makeWrapper ];
-    buildInputs = [ rubyEnv rubyEnv.wrappedRuby rubyEnv.bundler ];
+    nativeBuildInputs = [makeWrapper];
+    buildInputs = [rubyEnv rubyEnv.wrappedRuby rubyEnv.bundler];
 
     # taken from https://www.redmine.org/issues/33784
     # can be dropped when the upstream bug is closed and the fix is present in the upstream release
-    patches = [ ./0001-python3.patch ];
+    patches = [./0001-python3.patch];
 
     buildPhase = ''
       mv config config.dist
@@ -48,8 +54,7 @@ in
       homepage = "https://www.redmine.org/";
       changelog = "https://www.redmine.org/projects/redmine/wiki/changelog";
       platforms = platforms.linux;
-      maintainers = with maintainers; [ aanderse felixsinger megheaiulian ];
+      maintainers = with maintainers; [aanderse felixsinger megheaiulian];
       license = licenses.gpl2;
-      knownVulnerabilities = [ "CVE-2024-54133" "GHSA-r95h-9x8f-r3f7" ];
     };
   }
